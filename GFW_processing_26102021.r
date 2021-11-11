@@ -23,39 +23,16 @@ library(maps) # additional helpful mapping packages
 library(maptools)
 library(rgeos)
 library(rgdal)
-##############################################################################################
-# Resulting daily raster may have different extents, which prevents from operating among them.
-# In order to consider a common extent, this function gives the max extent for a list of rasters.
 
-#Get maximum extent (not used in new method)
-getMaxExtent <- function(rasters) {
-  extents <- sapply(rasters, FUN = function(x) {
-    raster::extent(x)
-  })
-  r <- raster(ext = extents[[1]], nrows = rasters[[1]]@nrows, ncols = rasters[[1]]@ncols)
-  max_extent <- sapply(extents, FUN = function(x) {
-    r <<- raster::extend(r, x,value=0)
-  })
-  raster::extent(r)
-}
-
-# and this other function will allow to sum all rasters using the max extent in the list of rasters
-#Sum_all (not used in new method)
-sum_all =
-function(rasters, extent){
- re = lapply(rasters, function(r){extend(r,extent,value=0)})
- Reduce("+", re)
-}
-##############################################################################################
-
+directory<-paste("D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/")
 year <- seq(2013, 2019,1) # list of year for fishing data. Fishing info must be downloaded and stored locally
 gfw_x_month <- list()
 dir.create (file.path("F:/TEMP/"), showWarnings = FALSE) #throwaway folder for temp files storage, make sure it's in a disk with at least 180/190 GB of free space
-	#D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos
+	#D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data
 	#C:/Users/carli/Dropbox/Tesis Carlos Veloy/Scripts Carlos
 	InitialT<-Sys.time()
 for (i in 1:length(year)){
-  gfw_file <- dir(paste("D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=""), pattern=".csv") #list of files
+  gfw_file <- dir(paste(directory,"FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=""), pattern=".csv") #list of files
   
 for (m in 1:12){
 gfw_x_day <- list() 
@@ -73,7 +50,7 @@ FDay<-sum(month_days[1:m])
 	  
 	  
 	  dir.create (file.path("F:/TEMP/"), showWarnings = FALSE)
-		gfw <- read.csv(paste(paste("D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=''), gfw_file[j], sep="/"),sep=",")
+		gfw <- read.csv(paste(paste(directory,"FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=''), gfw_file[j], sep="/"),sep=",")
 		# unique(gfw_$geartype)
 		# [1] "fishing"            "seiners"            "trawlers"           "trollers"           "fixed_gear"         "purse_seines"      
 		# [7] "set_gillnets"       "squid_jigger"       "pole_and_line"      "set_longlines"      "dredge_fishing"     "pots_and_traps"    
@@ -98,7 +75,7 @@ FDay<-sum(month_days[1:m])
 	gfw_x_day$na.rm<-TRUE
 	gfw_x_day_sum<-do.call(mosaic,gfw_x_day)
 	gfw_x_month[m] <- gfw_x_day_sum 
-	writeRaster(gfw_x_day_sum, filename = paste("D:/DPbox/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/FISHING_EFFORT/GFW_v2/Rasters_Fisheries/gfw", year[i],"_",m,".tif", sep=''),overwrite=TRUE)
+	writeRaster(gfw_x_day_sum, filename = paste(directory,"FISHING_EFFORT/GFW_v2/Rasters_Fisheries/gfw", year[i],"_",m,".tif", sep=''),overwrite=TRUE)
 	Sys.time
 	remove(effort_all_raster)
 	remove(gfw_x_day)
