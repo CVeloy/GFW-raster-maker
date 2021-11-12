@@ -119,5 +119,4 @@ for (i in 1:length(year)){
 }		
 
 FinalTF<-Sys.time()```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```
