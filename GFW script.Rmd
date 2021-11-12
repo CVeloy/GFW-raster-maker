@@ -2,18 +2,9 @@
 title: "GFW script"
 output: html_document
 ---
+Setup
+```{r }
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{}
 library(tidyverse) # for general data wrangling and plotting
 library(furrr) # for parallel operations on lists
 library(lubridate) # for working with dates
@@ -23,14 +14,110 @@ library(maps) # additional helpful mapping packages
 library(maptools)
 library(rgeos)
 library(rgdal)
+
+directory<-"C:/Users/carli/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/"
+year <- seq(2013, 2019,1) # list of year for fishing data. Fishing info must be downloaded and stored locally
+month<-seq(1, 12,1)
+gfw_x_month <- list()
+dir.create (file.path("C:/TEMP/"), showWarnings = FALSE) #throwaway folder for temp files storage, make sure it's in a disk with at least 180/190 GB of free space
+
+		# unique(gfw_$geartype)
+		# [1] "fishing"            "seiners"            "trawlers"           "trollers"           "fixed_gear"         "purse_seines"      
+		# [7] "set_gillnets"       "squid_jigger"       "pole_and_line"      "set_longlines"      "dredge_fishing"     "pots_and_traps"    
+		# [13] "tuna_purse_seines"  "drifting_longlines" "other_purse_seines" "other_seines" 
+		gear <- c("trawlers") # in case you want additional gear, just incorporate them into the vector
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Raster generating Loops
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r }
+
+	InitialT<-Sys.time()
+for (i in 1:length(year)){
+  gfw_file <- dir(paste(directory,"FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=""), pattern=".csv") #list of files
+  
+for (m in month){
+gfw_x_day <- list() 
+if((2012-year)/4==0){FebEnd=29}
+else {FebEnd=28}
+month_days <- c(31, FebEnd, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+if(m==1){IDay<-1} else
+{IDay<-sum(month_days[1:(m-1)])+1}
+FDay<-sum(month_days[1:m])
+
+	
+	### In case you were interested in a particular period, just selecte (subset) the dates from gfw_file object
+	
+	for(j in IDay:FDay){#1:length(gfw_file)
+	  
+	  
+	  dir.create (file.path("C:/TEMP/"), showWarnings = FALSE)
+		gfw <- read.csv(paste(paste(directory,"FISHING_EFFORT/GFW_v2/fleet-daily-csvs-100-v2-", year[i], sep=''), gfw_file[j], sep="/"),sep=",")
+
+			  
+				rasterOptions(tmpdir="C:/TEMP/")
+
+		gfw_ <- subset(gfw, gfw$geartype == gear)  #select the geartype of interest
+
+		effort_all <- gfw_ %>% 
+			group_by(cell_ll_lon,cell_ll_lat) %>%
+			summarize(fishing_hours = sum(fishing_hours, na.rm = T))
+		effort_all_raster <- rasterFromXYZ(effort_all, crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+		if(m>1){listn<-j-(sum(month_days[1:(m-1)]))} else {listn<-j}
+		gfw_x_day[listn] <- effort_all_raster
+		print(listn)
+		print(Sys.time())
+	}
+	FinalT<-Sys.time()
+	gfw_x_day$fun<-sum
+	gfw_x_day$na.rm<-TRUE
+	gfw_x_day_sum<-do.call(mosaic,gfw_x_day)
+	gfw_x_month[m] <- gfw_x_day_sum 
+	writeRaster(gfw_x_day_sum, filename = paste(directory,"FISHING_EFFORT/GFW_v2/Rasters_Fisheries/gfw", year[i],"_",m,".tif", sep=''),overwrite=TRUE)
+	Sys.time
+	remove(effort_all_raster)
+	remove(gfw_x_day)
+	unlink(file.path("C:/TEMP/"), recursive = TRUE)
+	gc()
+}}		
+
+FinalTF<-Sys.time()
 ```
+
+Raster sum loop
+
+```{r }
+gfw_x_month <- list()
+gfw_x_year <- list()
+directory2<-paste(directory,
+		 "/FISHING_EFFORT/GFW_v2/Raster Fisheries/",sep="")
+
+dir.create (file.path("F:/TEMP/"), showWarnings = FALSE) #throwaway folder for temp files storage, make sure it's in a disk with at least 60-70 GB of free space
+	
+	InitialT<-Sys.time()
+for (i in 1:length(year)){
+
+	   dir.create (file.path("C:/TEMP/"), showWarnings = FALSE)
+  				rasterOptions(tmpdir="C:/TEMP/")
+
+   for(m in month){
+   gfw<-raster(paste(directory2,"gfw",year[i],"_",m,".tif",sep=""))
+		gfw_x_month[m] <- gfw
+		print(Sys.time())
+}
+	FinalT<-Sys.time()
+	gfw_x_month$fun<-sum
+	gfw_x_month$na.rm<-TRUE
+	gfw_x_month_sum<-do.call(mosaic,gfw_x_month)
+	gfw_x_year[m] <- gfw_x_month_sum 
+	writeRaster(gfw_x_month_sum, filename = paste(directory2,"Full Years/gfw", year[i],"_Full",".tif", sep=''),overwrite=TRUE)
+	Sys.time
+	remove(gfw)
+	unlink(file.path("F:/TEMP/"), recursive = TRUE)
+	gc()
+}		
+
+FinalTF<-Sys.time()```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
