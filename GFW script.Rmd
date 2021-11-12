@@ -93,7 +93,7 @@ gfw_x_year <- list()
 directory2<-paste(directory,
 		 "/FISHING_EFFORT/GFW_v2/Raster Fisheries/",sep="")
 
-dir.create (file.path("F:/TEMP/"), showWarnings = FALSE) #throwaway folder for temp files storage, make sure it's in a disk with at least 60-70 GB of free space
+dir.create (file.path("C:/TEMP/"), showWarnings = FALSE) #throwaway folder for temp files storage, make sure it's in a disk with at least 60-70 GB of free space
 	
 	InitialT<-Sys.time()
 for (i in 1:length(year)){
@@ -114,7 +114,7 @@ for (i in 1:length(year)){
 	writeRaster(gfw_x_month_sum, filename = paste(directory2,"Full Years/gfw", year[i],"_Full",".tif", sep=''),overwrite=TRUE)
 	Sys.time
 	remove(gfw)
-	unlink(file.path("F:/TEMP/"), recursive = TRUE)
+	unlink(file.path("C:/TEMP/"), recursive = TRUE)
 	gc()
 }		
 
