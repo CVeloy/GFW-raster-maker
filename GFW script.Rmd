@@ -15,7 +15,7 @@ library(maptools)
 library(rgeos)
 library(rgdal)
 
-directory<-"C:/Users/carli/Dropbox/Tesis Carlos Veloy/Scripts Carlos/Data/"
+directory<-""#place folder directory
 year <- seq(2013, 2019,1) # list of year for fishing data. Fishing info must be downloaded and stored locally
 month<-seq(1, 12,1)
 gfw_x_month <- list()
