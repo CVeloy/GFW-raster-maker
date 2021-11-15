@@ -4,6 +4,7 @@ Command to make global rasters from Global Fishing Watch data
 -Data and completed rasters available in: https://www.dropbox.com/sh/pqr2bt80k2cs6dm/AADzwpBnrpHWtjzrKdnGgcA-a?dl=0
 
 
+
 GFW script Rmd:
 
 -In the inizialization of the object "directory" place directory where will house the files 
