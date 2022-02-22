@@ -39,7 +39,7 @@ for (i in 1:length(year)){
   
 for (m in month){
 gfw_x_day <- list() 
-if((2012-year)%%4==0){FebEnd=29}
+if((2012-year[i])%%4==0){FebEnd=29}
 else {FebEnd=28}
 month_days <- c(31, FebEnd, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
 if(m==1){IDay<-1} else
